@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>{{ post.title or site.title}}</title>
+    <link rel="stylesheet" href="/template/css/style.css">
+    <link rel="stylesheet" href="http://resource.farbox.com/css/basic.css?version={{resource_version}}">
+    <link href='http://fonts.googleapis.com/css?family=Lato:100' rel='stylesheet' type='text/css'>
+</head>
+<body>
+
+
+<div id="nav">
+
+    <ul>
+		{% set folders =  get_folders('/docs')  %}
+        {% for folder in sorted_by_position(folders) %}
+            <li class="caption">{{ folder.title }}</li>
+            {% set posts = get_posts(folder.path) %}
+            {% if posts %}
+            <ul>
+            {% for post in sorted_by_position(posts) %}
+                <li {% if request.path == post.url %} class="current" {% endif %}>
+                    <a href="{{ post.url }}" onclick="href_with_position(this);return false;">{{post.title}}</a>
+                </li>
+            {%endfor%}
+            </ul>
+            {% endif %}
+        {% endfor %}
+    </ul>
+
+</div>
+
+<div id="content">
+    {% if post %}
+        <h1>{{post.title}}</h1>
+        {{ post.html_content or post.content }}
+    {% else %}
+        {% set index_p = get_post('index.md') %}
+        {% if index_p %}
+            {{ index_p.content }}
+        {% else %}
+            <p>use <code>index.md</code> for your homepage.</p>
+        {% endif %}
+    {% endif %}
+
+</div>
+
+
+<script type="text/javascript">
+    var x,y;
+    var wheel = function(event) {
+        if (x && y) {
+            window.scrollBy(event.clientX - x, event.clientY - y);
+        }
+        x = event.clientX;
+        y = event.clientY;
+
+        var delta = 0;
+        if (!event)
+            event = window.event;
+        if (event.wheelDelta) {
+            delta = event.wheelDelta / 120;
+        } else if (event.detail) {
+            delta = -event.detail / 3;
+        }
+        if (delta)
+            handle(delta);
+
+    };
+
+
+    if (window.addEventListener) {
+        window.addEventListener('DOMMouseScroll', wheel, false);
+    }
+    window.onmousewheel = document.onmousewheel = wheel;
+
+
+    var handle = function(delta) {
+
+        var nav = document.getElementById('nav');
+        var top = nav.offsetTop;
+        var height = nav.offsetHeight;
+        if (delta < 0) {
+            if (Math.abs(top)<height-window.innerHeight-15)
+                nav.style.top = top - 10 + 'px';
+        } else {
+            if (top < 16)
+                nav.style.top = top + 10 + 'px';
+        }
+    };
+
+
+    function href_with_position(a){
+        var href = a.href;
+        var top = nav.offsetTop;
+        if (top<10)
+        {
+            window.location.href = href+"?top="+top;
+        }
+        else{
+            window.location.href = href;
+        }
+    }
+
+    {% if request.args.top %}
+    window.onload = function(){
+        var nav = document.getElementById('nav');
+        nav.style.top = '{{request.args.top}}px';
+    }
+    {%endif%}
+
+</script>
+
+
+</body>
+</html>

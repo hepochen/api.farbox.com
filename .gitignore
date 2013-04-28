@@ -1,0 +1,4 @@
+*.log
+fb.preview/
+*.DS_Store
+.idea/
